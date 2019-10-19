@@ -105,11 +105,15 @@ def archive_message(groupName, msgNumber, depth=0):
 			archive_message(groupName,msgNumber,depth+1)
 		else:
 			if resp.status_code == 500:
-				#we are most likely being blocked by Yahoo
-				log("Archive halted - it appears Yahoo has blocked you.", groupName)
-				log("Check if you can access the group's homepage from your browser. If you can't, you have been blocked.", groupName)
-				log("Don't worry, in a few hours (normally less than 3) you'll be unblocked and you can run this script again - it'll continue where you left off." ,groupName)
-				sys.exit()
+				if resp.reason == 'Internal Server Error':
+					log("Skipped message " + str(msgNumber) + " due to Yahoo internal server error - you should retrieve message manually through the web interface.", groupName)
+					return True;  # skip this message and continue
+				else:
+					#we are most likely being blocked by Yahoo
+					log("Archive halted - it appears Yahoo has blocked you.", groupName)
+					log("Check if you can access the group's homepage from your browser. If you can't, you have been blocked.", groupName)
+					log("Don't worry, in a few hours (normally less than 3) you'll be unblocked and you can run this script again - it'll continue where you left off." ,groupName)
+					sys.exit()
 			log("Failed to retrive message " + str(msgNumber) + " due to HTTP status code " + str(resp.status_code), groupName )
 			failed = True
 	
